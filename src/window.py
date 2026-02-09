@@ -71,6 +71,20 @@ class MemoriesWindow(Adw.ApplicationWindow):
         self.close_btn.connect("clicked", lambda *_: self.close())
         overlay.add_overlay(self.close_btn)
 
+        self.menu_btn = Gtk.Button()
+        self.menu_btn.set_icon_name("open-menu-symbolic")
+        self.menu_btn.add_css_class("circular")
+        self.menu_btn.set_halign(Gtk.Align.START)
+        self.menu_btn.set_valign(Gtk.Align.START)
+        self.menu_btn.set_margin_top(12)
+        self.menu_btn.set_margin_start(12)
+        self.menu_btn.set_visible(False)
+        self.menu_btn.connect(
+            "clicked",
+            lambda *_: self.get_application().activate_action("preferences", None),
+        )
+        overlay.add_overlay(self.menu_btn)
+
         motion = Gtk.EventControllerMotion()
         motion.connect("enter", self._on_pointer_enter)
         motion.connect("leave", self._on_pointer_leave)
@@ -78,7 +92,7 @@ class MemoriesWindow(Adw.ApplicationWindow):
 
         self.set_content(overlay)
         self.set_default_size(463, 463)
-        self.set_resizable(False)
+        self.set_resizable(True)
 
         self.pictureIndex = 0
         self.timer = None
@@ -96,10 +110,12 @@ class MemoriesWindow(Adw.ApplicationWindow):
 
     def _on_pointer_enter(self, controller, x, y):
         self.close_btn.set_visible(True)
+        self.menu_btn.set_visible(True)
         self._pause_carousel_timer()
 
     def _on_pointer_leave(self, controller):
         self.close_btn.set_visible(False)
+        self.menu_btn.set_visible(False)
         self._resume_carousel_timer()
 
     def findPictures(self, gio_file):
