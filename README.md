@@ -10,6 +10,8 @@ meson compile -C build
 meson install -C build                  # use sudo if installing to /usr or /usr/local
 ```
 
+The app icon is installed from `data/icons/` (hicolor scalable and symbolic) and is used by the GNOME shell and desktop entry.
+
 ## Usage
 
 - **Settings:** Ctrl+, or the menu button (top-left, shown when the pointer is over the window). Choose the picture folder and set the delay (seconds between images).
