@@ -81,6 +81,7 @@ class MemoriesWindow(Adw.ApplicationWindow):
         self.set_resizable(False)
 
         self.pictureIndex = 0
+        self.timer = None
 
         self.carousel.connect("page-changed", self.pictureChanged)
 
@@ -95,9 +96,11 @@ class MemoriesWindow(Adw.ApplicationWindow):
 
     def _on_pointer_enter(self, controller, x, y):
         self.close_btn.set_visible(True)
+        self._pause_carousel_timer()
 
     def _on_pointer_leave(self, controller):
         self.close_btn.set_visible(False)
+        self._resume_carousel_timer()
 
     def findPictures(self, gio_file):
         for info in gio_file.enumerate_children(
@@ -139,18 +142,31 @@ class MemoriesWindow(Adw.ApplicationWindow):
             return False  # stop calling
 
         picture = Gtk.Picture.new_for_file(pic)
-        picture.set_content_fit(Gtk.ContentFit.COVER)
+        picture.set_content_fit(Gtk.ContentFit.CONTAIN)
         self.carousel.append(picture)
 
 
         return True
 
 
+    def _pause_carousel_timer(self):
+        if self.timer is not None:
+            try:
+                GLib.source_remove(self.timer)
+            except Exception:
+                pass
+            self.timer = None
+
+    def _resume_carousel_timer(self):
+        self.toggleTimer()
+
     def toggleTimer(self):
-        try:
-            GLib.source_remove(self.timer)
-        except Exception:
-            pass
+        if self.timer is not None:
+            try:
+                GLib.source_remove(self.timer)
+            except Exception:
+                pass
+            self.timer = None
 
         delay = self.settings.get_int("delay")
         self.timer = GLib.timeout_add_seconds(delay, self.changePicture)

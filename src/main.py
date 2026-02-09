@@ -34,7 +34,7 @@ class MemoriesApplication(Adw.Application):
         super().__init__(application_id='com.riyani.memories',
                          flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
                          resource_base_path='/com/riyani/memories')
-        self.create_action('quit', lambda *_: self.quit(), ['<control>q'])
+        self.create_action('quit', lambda *_: self.quit(), ['<control>q', 'Escape'])
         self.create_action('about', self.on_about_action)
         self.create_action("preferences", self.on_preferences_action, ["<Ctrl>comma"])
         self.settings = Gio.Settings(schema_id="com.riyani.memories")
