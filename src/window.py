@@ -111,6 +111,10 @@ class MemoriesWindow(Adw.ApplicationWindow):
         overlay.add_controller(click)
 
         self.set_content(overlay)
+
+        key = Gtk.EventControllerKey()
+        key.connect("key-pressed", self._on_key_pressed)
+        self.add_controller(key)
         self.set_default_size(463, 463)
         self.set_resizable(True)
 
@@ -200,6 +204,15 @@ class MemoriesWindow(Adw.ApplicationWindow):
         self._current_index = (self._current_index - 1) % len(self._file_list)
         self._update_picture()
         self.toggleTimer()
+
+    def _on_key_pressed(self, controller, keyval, keycode, state):
+        if keyval == ord("j"):
+            self._go_next()
+            return True
+        if keyval == ord("k"):
+            self._go_previous()
+            return True
+        return False
 
     def _on_swipe_end(self, gesture, x, y):
         dx, dy = gesture.get_velocity()

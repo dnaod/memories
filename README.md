@@ -16,7 +16,7 @@ The app icon is installed from `data/icons/` (hicolor scalable and symbolic) and
 
 - **Settings:** Ctrl+, or the menu button (top-left, shown when the pointer is over the window). Choose the picture folder and set the delay (seconds between images).
 - **Quit:** Ctrl+Q, Escape, or the close button (top-right, shown when the pointer is over the window).
-- **Change picture:** Click the left third of the window for previous, the right third for next; or use touchpad swipe (left/right); or wait for the timer to advance.
+- **Change picture:** **j** (next) and **k** (previous), vim-style; or click the left third of the window for previous, the right third for next; or use touchpad swipe (left/right); or wait for the timer to advance.
 - **Pause:** The slideshow pauses while the pointer is inside the window and resumes when it leaves. The pause button (bottom-right, shown with the other controls) toggles a manual pause: when paused, the timer stops and the button stays visible even after the pointer leaves; click again to unpause.
 - **Display:** Images are scaled to fit the window (aspect ratio preserved). The window is resizable.
 
