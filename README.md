@@ -1,6 +1,6 @@
 # memories
 
-A picture carousel app for GNOME. Displays images from a folder in random order and advances automatically.
+A picture slideshow app for GNOME. Displays images from a folder in random order and advances automatically. Shows one image at a time and keeps memory use low, so it works well with large folders (e.g. 2000+ images).
 
 ## Building and installing
 
@@ -12,10 +12,10 @@ meson install -C build                  # use sudo if installing to /usr or /usr
 
 ## Usage
 
-- **Settings:** Ctrl+, or the menu button (top-left, shown when the pointer is over the window). Choose the picture folder and set the carousel delay (seconds between images).
+- **Settings:** Ctrl+, or the menu button (top-left, shown when the pointer is over the window). Choose the picture folder and set the delay (seconds between images).
 - **Quit:** Ctrl+Q, Escape, or the close button (top-right, shown when the pointer is over the window).
-- **Change picture:** Touchpad swipe gestures, or wait for the timer to advance.
-- **Pause:** The carousel pauses while the pointer is inside the window and resumes when it leaves.
+- **Change picture:** Click the left third of the window for previous, the right third for next; or use touchpad swipe (left/right); or wait for the timer to advance.
+- **Pause:** The slideshow pauses while the pointer is inside the window and resumes when it leaves.
 - **Display:** Images are scaled to fit the window (aspect ratio preserved). The window is resizable.
 
 Images from the selected folder are shown in random order each time the folder is loaded.

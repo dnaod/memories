@@ -90,12 +90,24 @@ class MemoriesWindow(Adw.ApplicationWindow):
         motion.connect("leave", self._on_pointer_leave)
         overlay.add_controller(motion)
 
+        self._swipe = Gtk.GestureSwipe()
+        self._swipe.connect("end", self._on_swipe_end)
+        overlay.add_controller(self._swipe)
+
+        click = Gtk.GestureClick()
+        click.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        click.connect("pressed", self._on_click_pressed)
+        overlay.add_controller(click)
+
         self.set_content(overlay)
         self.set_default_size(463, 463)
         self.set_resizable(True)
 
         self.pictureIndex = 0
         self.timer = None
+        self._file_list = []
+        self._current_index = 0
+        self._picture = None  # single Gtk.Picture widget
 
         self.carousel.connect("page-changed", self.pictureChanged)
 
@@ -134,35 +146,71 @@ class MemoriesWindow(Adw.ApplicationWindow):
                     yield child
 
     def clearCarousel(self):
-        num = self.carousel.get_n_pages()
-        for index in reversed(range(num)):
-            print(index)
-            print("n: "+str(self.carousel.get_n_pages()))
+        for index in reversed(range(self.carousel.get_n_pages())):
             self.carousel.remove(self.carousel.get_nth_page(index))
+        self._picture = None
 
     def onFolderSelect(self, settings, key):
         self.clearCarousel()
         self.loadPictures(settings.get_string(key))
 
+    def _file_at(self, index):
+        n = len(self._file_list)
+        if n == 0:
+            return None
+        return self._file_list[index % n]
+
+    def _update_picture(self):
+        if len(self._file_list) == 0 or self._picture is None:
+            return
+        self._picture.set_file(self._file_at(self._current_index))
+
+    def _go_next(self):
+        if len(self._file_list) == 0:
+            return
+        self._current_index = (self._current_index + 1) % len(self._file_list)
+        self._update_picture()
+        self.toggleTimer()
+
+    def _go_previous(self):
+        if len(self._file_list) == 0:
+            return
+        self._current_index = (self._current_index - 1) % len(self._file_list)
+        self._update_picture()
+        self.toggleTimer()
+
+    def _on_swipe_end(self, gesture, x, y):
+        dx, dy = gesture.get_velocity()
+        if dx < -100:
+            self._go_next()
+        elif dx > 100:
+            self._go_previous()
+
+    def _point_in_widget(self, widget, x, y):
+        alloc = widget.get_allocation()
+        return alloc.x <= x < alloc.x + alloc.width and alloc.y <= y < alloc.y + alloc.height
+
+    def _on_click_pressed(self, gesture, n_press, x, y):
+        overlay = gesture.get_widget()
+        if self._point_in_widget(self.close_btn, x, y) or self._point_in_widget(self.menu_btn, x, y):
+            return
+        w = overlay.get_allocated_width()
+        if x < w / 3:
+            self._go_previous()
+        elif x >= 2 * w / 3:
+            self._go_next()
 
     def loadPictures(self, folder):
-        files = list(self.findPictures(Gio.File.new_for_path(folder)))
-        random.shuffle(files)
-        self.pictureIter = iter(files)
-        GLib.idle_add(self.loadNextPicture)
+        self._file_list = list(self.findPictures(Gio.File.new_for_path(folder)))
+        if not self._file_list:
+            return
+        random.shuffle(self._file_list)
+        self._current_index = 0
 
-    def loadNextPicture(self):
-        try:
-            pic = next(self.pictureIter)
-        except StopIteration:
-            return False  # stop calling
-
-        picture = Gtk.Picture.new_for_file(pic)
-        picture.set_content_fit(Gtk.ContentFit.CONTAIN)
-        self.carousel.append(picture)
-
-
-        return True
+        self._picture = Gtk.Picture()
+        self._picture.set_content_fit(Gtk.ContentFit.CONTAIN)
+        self.carousel.append(self._picture)
+        self._update_picture()
 
 
     def _pause_carousel_timer(self):
@@ -192,13 +240,9 @@ class MemoriesWindow(Adw.ApplicationWindow):
         self.toggleTimer()
 
     def changePicture(self):
-
-        self.pictureIndex = self.pictureIndex + 1
-
-        if (self.pictureIndex == (self.carousel.get_n_pages())):
-            self.pictureIndex = 0
-
-        picture = self.carousel.get_nth_page(self.pictureIndex)
-        self.carousel.scroll_to(picture, True)
+        if len(self._file_list) == 0:
+            return True
+        self._current_index = (self._current_index + 1) % len(self._file_list)
+        self._update_picture()
         return True
 
