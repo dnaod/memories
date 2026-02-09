@@ -85,6 +85,17 @@ class MemoriesWindow(Adw.ApplicationWindow):
         )
         overlay.add_overlay(self.menu_btn)
 
+        self.pause_btn = Gtk.Button()
+        self.pause_btn.set_icon_name("media-playback-pause-symbolic")
+        self.pause_btn.add_css_class("circular")
+        self.pause_btn.set_halign(Gtk.Align.END)
+        self.pause_btn.set_valign(Gtk.Align.END)
+        self.pause_btn.set_margin_end(12)
+        self.pause_btn.set_margin_bottom(12)
+        self.pause_btn.set_visible(False)
+        self.pause_btn.connect("clicked", self._on_pause_clicked)
+        overlay.add_overlay(self.pause_btn)
+
         motion = Gtk.EventControllerMotion()
         motion.connect("enter", self._on_pointer_enter)
         motion.connect("leave", self._on_pointer_leave)
@@ -105,6 +116,7 @@ class MemoriesWindow(Adw.ApplicationWindow):
 
         self.pictureIndex = 0
         self.timer = None
+        self._user_paused = False
         self._file_list = []
         self._current_index = 0
         self._picture = None  # single Gtk.Picture widget
@@ -123,12 +135,22 @@ class MemoriesWindow(Adw.ApplicationWindow):
     def _on_pointer_enter(self, controller, x, y):
         self.close_btn.set_visible(True)
         self.menu_btn.set_visible(True)
+        self.pause_btn.set_visible(True)
         self._pause_carousel_timer()
 
     def _on_pointer_leave(self, controller):
         self.close_btn.set_visible(False)
         self.menu_btn.set_visible(False)
-        self._resume_carousel_timer()
+        if not self._user_paused:
+            self.pause_btn.set_visible(False)
+            self._resume_carousel_timer()
+
+    def _on_pause_clicked(self, btn):
+        self._user_paused = not self._user_paused
+        if self._user_paused:
+            self._pause_carousel_timer()
+        else:
+            self.toggleTimer()
 
     def findPictures(self, gio_file):
         for info in gio_file.enumerate_children(
@@ -192,7 +214,11 @@ class MemoriesWindow(Adw.ApplicationWindow):
 
     def _on_click_pressed(self, gesture, n_press, x, y):
         overlay = gesture.get_widget()
-        if self._point_in_widget(self.close_btn, x, y) or self._point_in_widget(self.menu_btn, x, y):
+        if (
+            self._point_in_widget(self.close_btn, x, y)
+            or self._point_in_widget(self.menu_btn, x, y)
+            or self._point_in_widget(self.pause_btn, x, y)
+        ):
             return
         w = overlay.get_allocated_width()
         if x < w / 3:
@@ -222,7 +248,8 @@ class MemoriesWindow(Adw.ApplicationWindow):
             self.timer = None
 
     def _resume_carousel_timer(self):
-        self.toggleTimer()
+        if not self._user_paused:
+            self.toggleTimer()
 
     def toggleTimer(self):
         if self.timer is not None:
