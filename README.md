@@ -1,11 +1,19 @@
 # memories
-A picture carousel app for GNOME.
 
-<img width="984" height="984" alt="image" src="https://github.com/user-attachments/assets/e0a3088c-3d8c-4625-999c-9f64ff630eb9" />
+A picture carousel app for GNOME. Displays images from a folder in random order and advances automatically.
 
-https://github.com/user-attachments/assets/c3e139af-259a-4ef3-8d82-46feb04e53c7
+## Building and installing
 
-Ctrl + , to bring up the preferences page where you can select the pictures folder.
+```bash
+meson setup build --prefix=/usr/local   # or --prefix=$HOME/.local for user install
+meson compile -C build
+meson install -C build                  # use sudo if installing to /usr or /usr/local
+```
 
-You can switch the picture by using touchpad gestures.
+## Usage
 
+- **Preferences (Ctrl+,):** Choose the picture folder and set the carousel delay (seconds between images).
+- **Quit:** Ctrl+Q, or use the close button that appears in the top-right when the pointer is over the window.
+- **Change picture:** Touchpad swipe gestures, or wait for the timer to advance.
+
+Images from the selected folder are shown in random order each time the folder is loaded.

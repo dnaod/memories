@@ -17,6 +17,8 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import random
+
 from gi.repository import Adw
 from gi.repository import Gtk, Gio, GLib
 
@@ -55,9 +57,27 @@ class MemoriesWindow(Adw.ApplicationWindow):
         windowHandle = Gtk.WindowHandle()
         windowHandle.set_child(self.carousel)
 
+        overlay = Gtk.Overlay()
+        overlay.set_child(windowHandle)
 
-        self.set_content(windowHandle)
-        self.set_default_size(370, 370)
+        self.close_btn = Gtk.Button()
+        self.close_btn.set_icon_name("window-close-symbolic")
+        self.close_btn.add_css_class("circular")
+        self.close_btn.set_halign(Gtk.Align.END)
+        self.close_btn.set_valign(Gtk.Align.START)
+        self.close_btn.set_margin_top(12)
+        self.close_btn.set_margin_end(12)
+        self.close_btn.set_visible(False)
+        self.close_btn.connect("clicked", lambda *_: self.close())
+        overlay.add_overlay(self.close_btn)
+
+        motion = Gtk.EventControllerMotion()
+        motion.connect("enter", self._on_pointer_enter)
+        motion.connect("leave", self._on_pointer_leave)
+        overlay.add_controller(motion)
+
+        self.set_content(overlay)
+        self.set_default_size(463, 463)
         self.set_resizable(False)
 
         self.pictureIndex = 0
@@ -72,6 +92,12 @@ class MemoriesWindow(Adw.ApplicationWindow):
         self.settings.connect("changed::delay", lambda *args: self.toggleTimer())
 
         self.toggleTimer()
+
+    def _on_pointer_enter(self, controller, x, y):
+        self.close_btn.set_visible(True)
+
+    def _on_pointer_leave(self, controller):
+        self.close_btn.set_visible(False)
 
     def findPictures(self, gio_file):
         for info in gio_file.enumerate_children(
@@ -101,8 +127,9 @@ class MemoriesWindow(Adw.ApplicationWindow):
 
 
     def loadPictures(self, folder):
-
-        self.pictureIter = self.findPictures(Gio.File.new_for_path(folder))
+        files = list(self.findPictures(Gio.File.new_for_path(folder)))
+        random.shuffle(files)
+        self.pictureIter = iter(files)
         GLib.idle_add(self.loadNextPicture)
 
     def loadNextPicture(self):
