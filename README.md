@@ -21,3 +21,7 @@ The app icon is installed from `data/icons/` (hicolor scalable and symbolic) and
 - **Display:** Images are scaled to fit the window (aspect ratio preserved). The window is resizable.
 
 Images from the selected folder are shown in random order each time the folder is loaded.
+
+## Credits
+
+This app is based on [memories](https://github.com/coldsprinkles/memories) by [coldsprinkles](https://github.com/coldsprinkles). This fork is maintained by [dnaod](https://github.com/dnaod/memories). Both are licensed under GPL-3.0-or-later.

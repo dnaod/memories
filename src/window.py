@@ -1,6 +1,7 @@
-# window.py
+# window.py – main window and slideshow logic
 #
-# Copyright 2026 riyani
+# Copyright (C) coldsprinkles (https://github.com/coldsprinkles/memories)
+# Copyright (C) 2026 dnaod (https://github.com/dnaod/memories)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

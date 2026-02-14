@@ -10,16 +10,16 @@
     <p>No description</p>
   </description>
 
-  <developer id="tld.vendor">
-    <name>Developer name</name>
+  <developer id="github.dnaod">
+    <name>dnaod</name>
   </developer>
 
   <!-- Required: Should be a link to the upstream homepage for the component -->
-  <url type="homepage">https://example.org/</url>
+  <url type="homepage">https://github.com/dnaod/memories</url>
   <!-- Recommended: It is highly recommended for open-source projects to display the source code repository -->
-  <url type="vcs-browser">https://example.org/repository</url>
+  <url type="vcs-browser">https://github.com/dnaod/memories</url>
   <!-- Should point to the software's bug tracking system, for users to report new bugs -->
-  <url type="bugtracker">https://example.org/issues</url>
+  <url type="bugtracker">https://github.com/dnaod/memories/issues</url>
   <!-- Should link a FAQ page for this software, to answer some of the most-asked questions in detail -->
   <!-- URLs of this type should point to a webpage where users can submit or modify translations of the upstream project -->
   <url type="translate">https://example.org/translate</url>
@@ -58,14 +58,10 @@
   </screenshots>
 
   <releases>
-    <release version="1.0.1" date="2024-01-18">
-      <url type="details">https://example.org/changelog.html#version_1.0.1</url>
+    <release version="1.0" date="2026-02-13">
+      <url type="details">https://github.com/dnaod/memories</url>
       <description translate="no">
-        <p>Release description</p>
-        <ul>
-          <li>List of changes</li>
-          <li>List of changes</li>
-        </ul>
+        <p>First stable release of the dnaod fork. Picture slideshow for GNOME with vim-style keys, touchpad gestures, and low memory use for large folders.</p>
       </description>
     </release>
   </releases>

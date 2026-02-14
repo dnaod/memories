@@ -1,6 +1,7 @@
-# main.py
+# main.py – application entry point and preferences
 #
-# Copyright 2026 riyani
+# Copyright (C) coldsprinkles (https://github.com/coldsprinkles/memories)
+# Copyright (C) 2026 dnaod (https://github.com/dnaod/memories)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,10 +31,11 @@ from .window import MemoriesWindow
 class MemoriesApplication(Adw.Application):
     """The main application singleton class."""
 
-    def __init__(self):
+    def __init__(self, version):
         super().__init__(application_id='com.riyani.memories',
                          flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
                          resource_base_path='/com/riyani/memories')
+        self.version = version
         self.create_action('quit', lambda *_: self.quit(), ['<control>q', 'Escape'])
         self.create_action('about', self.on_about_action)
         self.create_action("preferences", self.on_preferences_action, ["<Ctrl>comma"])
@@ -54,12 +56,16 @@ class MemoriesApplication(Adw.Application):
 
     def on_about_action(self, *args):
         """Callback for the app.about action."""
-        about = Adw.AboutDialog(application_name='memories',
-                                application_icon='com.riyani.memories',
-                                developer_name='riyani',
-                                version='0.1.0',
-                                developers=['riyani'],
-                                copyright='© 2026 riyani')
+        about = Adw.AboutDialog(
+            application_name='memories',
+            application_icon='com.riyani.memories',
+            developer_name='dnaod',
+            version=self.version,
+            developers=['dnaod'],
+            copyright='© 2026 dnaod',
+            website='https://github.com/dnaod/memories',
+        )
+        about.add_credit_section('Original author', ['coldsprinkles — https://github.com/coldsprinkles/memories'])
         about.present(self.props.active_window)
 
     def on_preferences_action(self, action, param):
@@ -139,5 +145,5 @@ class MemoriesApplication(Adw.Application):
 
 def main(version):
     """The application's entry point."""
-    app = MemoriesApplication()
+    app = MemoriesApplication(version=version)
     return app.run(sys.argv)
