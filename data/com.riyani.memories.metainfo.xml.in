@@ -58,6 +58,12 @@
   </screenshots>
 
   <releases>
+    <release version="1.1" date="2026-02-13">
+      <url type="details">https://github.com/dnaod/memories</url>
+      <description translate="no">
+        <p>Minor version bump.</p>
+      </description>
+    </release>
     <release version="1.0" date="2026-02-13">
       <url type="details">https://github.com/dnaod/memories</url>
       <description translate="no">
