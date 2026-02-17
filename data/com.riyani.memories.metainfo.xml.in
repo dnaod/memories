@@ -58,6 +58,12 @@
   </screenshots>
 
   <releases>
+    <release version="1.2" date="2026-02-16">
+      <url type="details">https://github.com/dnaod/memories</url>
+      <description translate="no">
+        <p>GIF support: animated GIFs play once then advance, or loop when the pointer is over the window or the slideshow is paused.</p>
+      </description>
+    </release>
     <release version="1.1" date="2026-02-13">
       <url type="details">https://github.com/dnaod/memories</url>
       <description translate="no">

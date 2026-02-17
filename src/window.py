@@ -125,6 +125,9 @@ class MemoriesWindow(Adw.ApplicationWindow):
         self._file_list = []
         self._current_index = 0
         self._picture = None  # single Gtk.Picture widget
+        self._gif_media = None  # Gtk.MediaFile when showing a GIF
+        self._gif_ended_id = None  # handler id for notify::ended
+        self._pointer_over = False  # pointer within window bounds
 
         self.carousel.connect("page-changed", self.pictureChanged)
 
@@ -138,20 +141,41 @@ class MemoriesWindow(Adw.ApplicationWindow):
         self.toggleTimer()
 
     def _on_pointer_enter(self, controller, x, y):
+        self._pointer_over = True
         self.close_btn.set_visible(True)
         self.menu_btn.set_visible(True)
         self.pause_btn.set_visible(True)
         self._pause_carousel_timer()
+        self._apply_gif_loop_state()
 
     def _on_pointer_leave(self, controller):
+        self._pointer_over = False
         self.close_btn.set_visible(False)
         self.menu_btn.set_visible(False)
         if not self._user_paused:
             self.pause_btn.set_visible(False)
             self._resume_carousel_timer()
+        self._apply_gif_loop_state()
+
+    def _gif_should_loop(self):
+        return self._user_paused or self._pointer_over
+
+    def _apply_gif_loop_state(self):
+        if self._gif_media is None:
+            return
+        should_loop = self._gif_should_loop()
+        self._gif_media.set_loop(should_loop)
+        if self._gif_ended_id is not None:
+            self._gif_media.disconnect(self._gif_ended_id)
+            self._gif_ended_id = None
+        if not should_loop:
+            self._gif_ended_id = self._gif_media.connect(
+                "notify::ended", self._on_gif_ended
+            )
 
     def _on_pause_clicked(self, btn):
         self._user_paused = not self._user_paused
+        self._apply_gif_loop_state()
         if self._user_paused:
             self._pause_carousel_timer()
         else:
@@ -173,6 +197,7 @@ class MemoriesWindow(Adw.ApplicationWindow):
                     yield child
 
     def clearCarousel(self):
+        self._clear_current_gif()
         for index in reversed(range(self.carousel.get_n_pages())):
             self.carousel.remove(self.carousel.get_nth_page(index))
         self._picture = None
@@ -187,10 +212,41 @@ class MemoriesWindow(Adw.ApplicationWindow):
             return None
         return self._file_list[index % n]
 
+    def _is_gif(self, gio_file):
+        path = gio_file.get_path()
+        return path is not None and path.lower().endswith(".gif")
+
+    def _clear_current_gif(self):
+        if self._gif_ended_id is not None and self._gif_media is not None:
+            self._gif_media.disconnect(self._gif_ended_id)
+        self._gif_ended_id = None
+        self._gif_media = None
+        if self._picture is not None:
+            self._picture.set_paintable(None)
+
+    def _on_gif_ended(self, media, param_spec):
+        if not self._gif_should_loop():
+            self._go_next()
+
     def _update_picture(self):
         if len(self._file_list) == 0 or self._picture is None:
             return
-        self._picture.set_file(self._file_at(self._current_index))
+
+        self._clear_current_gif()
+        current = self._file_at(self._current_index)
+        if current is None:
+            return
+
+        if self._is_gif(current):
+            self._gif_media = Gtk.MediaFile.new_for_file(current)
+            self._picture.set_file(None)
+            self._picture.set_paintable(self._gif_media)
+            self._apply_gif_loop_state()
+            self._gif_media.set_playing(True)
+            self._pause_carousel_timer()
+        else:
+            self._picture.set_file(current)
+            self.toggleTimer()
 
     def _go_next(self):
         if len(self._file_list) == 0:
