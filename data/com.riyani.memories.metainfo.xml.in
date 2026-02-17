@@ -58,6 +58,12 @@
   </screenshots>
 
   <releases>
+    <release version="1.4" date="2026-02-16">
+      <url type="details">https://github.com/dnaod/memories</url>
+      <description translate="no">
+        <p>Include images from subfolders: optional setting with depth 1–5. Include Subfolders toggle and Depth setting in preferences; filename overlay shows subfolder path when the image is in a subfolder. Hidden directories are skipped.</p>
+      </description>
+    </release>
     <release version="1.3" date="2026-02-16">
       <url type="details">https://github.com/dnaod/memories</url>
       <description translate="no">

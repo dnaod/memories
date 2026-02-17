@@ -90,6 +90,35 @@ class MemoriesApplication(Adw.Application):
         folderRow.set_activatable_widget(folderChooserButton)
         folderRow.add_suffix(folderChooserButton)
 
+        includeSubfoldersSwitch = Gtk.Switch()
+        includeSubfoldersSwitch.set_valign(Gtk.Align.CENTER)
+        self.settings.bind(
+            "include-subfolders",
+            includeSubfoldersSwitch,
+            "active",
+            Gio.SettingsBindFlags.DEFAULT,
+        )
+        includeSubfoldersRow = Adw.ActionRow(title="Include Subfolders")
+        includeSubfoldersRow.set_activatable_widget(includeSubfoldersSwitch)
+        includeSubfoldersRow.add_suffix(includeSubfoldersSwitch)
+
+        depthSpin = Gtk.SpinButton.new_with_range(1, 5, 1)
+        depthSpin.set_valign(Gtk.Align.CENTER)
+        self.settings.bind(
+            "subfolder-depth",
+            depthSpin,
+            "value",
+            Gio.SettingsBindFlags.DEFAULT,
+        )
+        depthRow = Adw.ActionRow(title="Depth")
+        depthRow.set_activatable_widget(depthSpin)
+        depthRow.add_suffix(depthSpin)
+        depthRow.set_sensitive(self.settings.get_boolean("include-subfolders"))
+        includeSubfoldersSwitch.connect(
+            "notify::active",
+            lambda sw, _: depthRow.set_sensitive(sw.get_active()),
+        )
+
         delaySpin = Gtk.SpinButton.new_with_range(1, 2000, 1)
         delaySpin.set_valign(Gtk.Align.CENTER)
         self.settings.bind("delay", delaySpin, "value", Gio.SettingsBindFlags.DEFAULT)
@@ -107,6 +136,8 @@ class MemoriesApplication(Adw.Application):
 
         group.add(delayRow)
         group.add(folderRow)
+        group.add(includeSubfoldersRow)
+        group.add(depthRow)
         group.add(aboutRow)
         page.add(group)
         prefs.add(page)

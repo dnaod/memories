@@ -18,6 +18,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import os
 import random
 
 from gi.repository import Adw
@@ -145,6 +146,7 @@ class MemoriesWindow(Adw.ApplicationWindow):
         self._gif_media = None  # Gtk.MediaFile when showing a GIF
         self._gif_ended_id = None  # handler id for notify::ended
         self._pointer_over = False  # pointer within window bounds
+        self._root_folder = None  # picture-folder path, for relative filename display
 
         self.carousel.connect("page-changed", self.pictureChanged)
 
@@ -153,6 +155,12 @@ class MemoriesWindow(Adw.ApplicationWindow):
             self.loadPictures(picturesFolder)
 
         self.settings.connect("changed::picture-folder", self.onFolderSelect)
+        self.settings.connect(
+            "changed::include-subfolders", self._on_include_subfolders_changed
+        )
+        self.settings.connect(
+            "changed::subfolder-depth", self._on_subfolder_depth_changed
+        )
         self.settings.connect("changed::delay", lambda *args: self.toggleTimer())
 
         self.toggleTimer()
@@ -180,7 +188,21 @@ class MemoriesWindow(Adw.ApplicationWindow):
     def _update_filename_label(self):
         current = self._file_at(self._current_index)
         if current is not None:
-            name = current.get_basename() or ""
+            path = current.get_path()
+            if path and self._root_folder:
+                root = self._root_folder.rstrip(os.sep) or self._root_folder
+                if path.startswith(root) and (
+                    len(path) == len(root) or path[len(root)] == "/"
+                ):
+                    rel = path[len(root):].lstrip(os.sep)
+                    if rel:
+                        name = rel
+                    else:
+                        name = current.get_basename() or ""
+                else:
+                    name = current.get_basename() or ""
+            else:
+                name = current.get_basename() or ""
             self.filename_label.set_label(name)
         else:
             self.filename_label.set_label("")
@@ -209,16 +231,20 @@ class MemoriesWindow(Adw.ApplicationWindow):
         else:
             self.toggleTimer()
 
-    def findPictures(self, gio_file):
+    def findPictures(self, gio_file, depth=0, max_depth=2):
         for info in gio_file.enumerate_children(
             'standard::name,standard::type,standard::content-type',
             Gio.FileQueryInfoFlags.NONE,
             None
         ):
-            child = gio_file.get_child(info.get_name())
+            name = info.get_name()
+            child = gio_file.get_child(name)
 
             if info.get_file_type() == Gio.FileType.DIRECTORY:
-                yield from self.findPictures(child)
+                if name.startswith("."):
+                    continue
+                if depth < max_depth:
+                    yield from self.findPictures(child, depth + 1, max_depth)
             else:
                 ct = info.get_content_type()
                 if ct and ct.startswith("image"):
@@ -233,6 +259,20 @@ class MemoriesWindow(Adw.ApplicationWindow):
     def onFolderSelect(self, settings, key):
         self.clearCarousel()
         self.loadPictures(settings.get_string(key))
+
+    def _on_include_subfolders_changed(self, settings, key):
+        folder = settings.get_string("picture-folder")
+        if folder:
+            self.clearCarousel()
+            self.loadPictures(folder)
+
+    def _on_subfolder_depth_changed(self, settings, key):
+        if not settings.get_boolean("include-subfolders"):
+            return
+        folder = settings.get_string("picture-folder")
+        if folder:
+            self.clearCarousel()
+            self.loadPictures(folder)
 
     def _file_at(self, index):
         n = len(self._file_list)
@@ -326,7 +366,14 @@ class MemoriesWindow(Adw.ApplicationWindow):
             self._go_next()
 
     def loadPictures(self, folder):
-        self._file_list = list(self.findPictures(Gio.File.new_for_path(folder)))
+        self._root_folder = os.path.abspath(folder)
+        if self.settings.get_boolean("include-subfolders"):
+            max_depth = max(1, min(5, self.settings.get_int("subfolder-depth")))
+        else:
+            max_depth = 0
+        self._file_list = list(
+            self.findPictures(Gio.File.new_for_path(folder), max_depth=max_depth)
+        )
         if not self._file_list:
             return
         random.shuffle(self._file_list)

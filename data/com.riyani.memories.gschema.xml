@@ -4,6 +4,12 @@
 	  <key name="picture-folder" type="s">
       <default>"/home/riyani/Pictures/Images/randomthingthatdoesntexist"</default>
     </key>
+	  <key name="include-subfolders" type="b">
+      <default>true</default>
+    </key>
+	  <key name="subfolder-depth" type="i">
+      <default>2</default>
+    </key>
 	  <key name="delay" type="i">
       <default>5</default>
     </key>
