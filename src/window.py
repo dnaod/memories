@@ -21,7 +21,7 @@
 import random
 
 from gi.repository import Adw
-from gi.repository import Gtk, Gio, GLib
+from gi.repository import Gdk, Gtk, Gio, GLib
 
 class MemoriesWindow(Adw.ApplicationWindow):
     __gtype_name__ = 'MemoriesWindow'
@@ -97,6 +97,23 @@ class MemoriesWindow(Adw.ApplicationWindow):
         self.pause_btn.connect("clicked", self._on_pause_clicked)
         overlay.add_overlay(self.pause_btn)
 
+        self.filename_label = Gtk.Label()
+        self.filename_label.add_css_class("filename-overlay")
+        self.filename_label.set_halign(Gtk.Align.CENTER)
+        self.filename_label.set_valign(Gtk.Align.END)
+        self.filename_label.set_margin_bottom(12)
+        self.filename_label.set_visible(False)
+        self.filename_label.set_selectable(True)
+        overlay.add_overlay(self.filename_label)
+
+        filename_css = Gtk.CssProvider()
+        filename_css.load_from_data(b".filename-overlay { font-size: 11px; }")
+        Gtk.StyleContext.add_provider_for_display(
+            Gdk.Display.get_default(),
+            filename_css,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
+        )
+
         motion = Gtk.EventControllerMotion()
         motion.connect("enter", self._on_pointer_enter)
         motion.connect("leave", self._on_pointer_leave)
@@ -145,6 +162,8 @@ class MemoriesWindow(Adw.ApplicationWindow):
         self.close_btn.set_visible(True)
         self.menu_btn.set_visible(True)
         self.pause_btn.set_visible(True)
+        self._update_filename_label()
+        self.filename_label.set_visible(True)
         self._pause_carousel_timer()
         self._apply_gif_loop_state()
 
@@ -152,10 +171,19 @@ class MemoriesWindow(Adw.ApplicationWindow):
         self._pointer_over = False
         self.close_btn.set_visible(False)
         self.menu_btn.set_visible(False)
+        self.filename_label.set_visible(False)
         if not self._user_paused:
             self.pause_btn.set_visible(False)
             self._resume_carousel_timer()
         self._apply_gif_loop_state()
+
+    def _update_filename_label(self):
+        current = self._file_at(self._current_index)
+        if current is not None:
+            name = current.get_basename() or ""
+            self.filename_label.set_label(name)
+        else:
+            self.filename_label.set_label("")
 
     def _gif_should_loop(self):
         return self._user_paused or self._pointer_over
@@ -237,6 +265,7 @@ class MemoriesWindow(Adw.ApplicationWindow):
         if current is None:
             return
 
+        self._update_filename_label()
         if self._is_gif(current):
             self._gif_media = Gtk.MediaFile.new_for_file(current)
             self._picture.set_file(None)

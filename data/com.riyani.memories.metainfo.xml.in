@@ -58,6 +58,12 @@
   </screenshots>
 
   <releases>
+    <release version="1.3" date="2026-02-16">
+      <url type="details">https://github.com/dnaod/memories</url>
+      <description translate="no">
+        <p>Show current filename at bottom of window when pointer is over the window.</p>
+      </description>
+    </release>
     <release version="1.2" date="2026-02-16">
       <url type="details">https://github.com/dnaod/memories</url>
       <description translate="no">
