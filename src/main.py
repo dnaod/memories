@@ -162,6 +162,17 @@ class MemoriesApplication(Adw.Application):
 
     def selectFolder(self, btn):
         file_dialog = Gtk.FileDialog()
+        folder_path = self.settings.get_string("picture-folder")
+        if folder_path:
+            gfile = Gio.File.new_for_path(folder_path)
+            try:
+                info = gfile.query_info(
+                    "standard::type", Gio.FileQueryInfoFlags.NONE, None
+                )
+                if info.get_file_type() == Gio.FileType.DIRECTORY:
+                    file_dialog.set_initial_folder(gfile)
+            except Exception:
+                pass  # use default (e.g. home)
         file_dialog.select_folder(self.props.active_window, None, self.onSingleSelected)
 
     def onSingleSelected(self, file_dialog, result):

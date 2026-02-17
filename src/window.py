@@ -107,6 +107,12 @@ class MemoriesWindow(Adw.ApplicationWindow):
         self.filename_label.set_selectable(True)
         overlay.add_overlay(self.filename_label)
 
+        self._empty_message_label = Gtk.Label(label="Please choose a Picture Folder")
+        self._empty_message_label.set_halign(Gtk.Align.CENTER)
+        self._empty_message_label.set_valign(Gtk.Align.CENTER)
+        self._empty_message_label.set_visible(False)
+        overlay.add_overlay(self._empty_message_label)
+
         filename_css = Gtk.CssProvider()
         filename_css.load_from_data(b".filename-overlay { font-size: 11px; }")
         Gtk.StyleContext.add_provider_for_display(
@@ -153,6 +159,8 @@ class MemoriesWindow(Adw.ApplicationWindow):
         picturesFolder = self.settings.get_string("picture-folder")
         if picturesFolder:
             self.loadPictures(picturesFolder)
+        if not self._file_list:
+            self._empty_message_label.set_visible(True)
 
         self.settings.connect("changed::picture-folder", self.onFolderSelect)
         self.settings.connect(
@@ -371,11 +379,19 @@ class MemoriesWindow(Adw.ApplicationWindow):
             max_depth = max(1, min(5, self.settings.get_int("subfolder-depth")))
         else:
             max_depth = 0
-        self._file_list = list(
-            self.findPictures(Gio.File.new_for_path(folder), max_depth=max_depth)
-        )
+        try:
+            self._file_list = list(
+                self.findPictures(
+                    Gio.File.new_for_path(folder), max_depth=max_depth
+                )
+            )
+        except Exception:
+            self._file_list = []
+            self.settings.set_string("picture-folder", "")
         if not self._file_list:
+            self._empty_message_label.set_visible(True)
             return
+        self._empty_message_label.set_visible(False)
         random.shuffle(self._file_list)
         self._current_index = 0
 

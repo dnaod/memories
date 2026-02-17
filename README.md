@@ -21,7 +21,7 @@ The app icon is installed from `data/icons/` (hicolor scalable and symbolic) and
 - **Display:** Images are scaled to fit the window (aspect ratio preserved). The window is resizable.
 - **GIFs:** Animated GIFs play once and then the slideshow advances to the next file. While the pointer is over the window or the slideshow is paused, GIFs loop instead of advancing.
 
-Images from the selected folder (and optionally its subfolders, per settings) are shown in random order each time the folder is loaded. When the pointer is over the window, the current image’s filename is shown at the bottom; if the image is in a subfolder, the path relative to the picture folder (e.g. `2024/vacation/beach.jpg`) is displayed.
+Images from the selected folder (and optionally its subfolders, per settings) are shown in random order each time the folder is loaded. When the pointer is over the window, the current image’s filename is shown at the bottom; if the image is in a subfolder, the path relative to the picture folder (e.g. `2024/vacation/beach.jpg`) is displayed. If the saved picture folder is unavailable at startup (e.g. removed or unmounted), the app still opens, shows “Please choose a Picture Folder” in the centre, and clears the setting; the folder chooser opens to the current picture folder when that folder is available.
 
 ## Credits
 

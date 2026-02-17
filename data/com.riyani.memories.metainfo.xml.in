@@ -58,6 +58,12 @@
   </screenshots>
 
   <releases>
+    <release version="1.5" date="2026-02-16">
+      <url type="details">https://github.com/dnaod/memories</url>
+      <description translate="no">
+        <p>If the saved picture folder is unavailable at startup, the app still opens with no photos and shows “Please choose a Picture Folder”; the setting is cleared. Folder chooser opens to the current picture folder when available.</p>
+      </description>
+    </release>
     <release version="1.4" date="2026-02-16">
       <url type="details">https://github.com/dnaod/memories</url>
       <description translate="no">
