@@ -341,10 +341,10 @@ class MemoriesWindow(Adw.ApplicationWindow):
         self.toggleTimer()
 
     def _on_key_pressed(self, controller, keyval, keycode, state):
-        if keyval == ord("j"):
+        if keyval in (ord("j"), Gdk.KEY_Right, Gdk.KEY_Down):
             self._go_next()
             return True
-        if keyval == ord("k"):
+        if keyval in (ord("k"), Gdk.KEY_Left, Gdk.KEY_Up):
             self._go_previous()
             return True
         if keyval == ord("d"):
