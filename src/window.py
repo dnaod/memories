@@ -153,6 +153,7 @@ class MemoriesWindow(Adw.ApplicationWindow):
         self._gif_ended_id = None  # handler id for notify::ended
         self._pointer_over = False  # pointer within window bounds
         self._root_folder = None  # picture-folder path, for relative filename display
+        self._delete_pending = False  # True while delete confirmation dialog is open
 
         self.carousel.connect("page-changed", self.pictureChanged)
 
@@ -346,7 +347,56 @@ class MemoriesWindow(Adw.ApplicationWindow):
         if keyval == ord("k"):
             self._go_previous()
             return True
+        if keyval == ord("d"):
+            self._confirm_delete_image()
+            return True
         return False
+
+    def _confirm_delete_image(self):
+        if not self._file_list:
+            return
+        current = self._file_at(self._current_index)
+        if current is None:
+            return
+
+        self._delete_pending = True
+        self._pause_carousel_timer()
+
+        path = current.get_path() or current.get_basename() or ""
+        dialog = Adw.AlertDialog(
+            heading="Delete Image?",
+            body=path,
+        )
+        dialog.add_response("cancel", "Cancel")
+        dialog.add_response("delete", "Delete")
+        dialog.set_response_appearance(
+            "delete", Adw.ResponseAppearance.DESTRUCTIVE
+        )
+        dialog.set_default_response("delete")
+        dialog.set_close_response("cancel")
+        dialog.connect("response", self._on_delete_response, current)
+        dialog.present(self)
+
+    def _on_delete_response(self, dialog, response, gio_file):
+        self._delete_pending = False
+        if response == "delete":
+            try:
+                gio_file.delete(None)
+            except Exception:
+                self._resume_carousel_timer()
+                return
+            try:
+                self._file_list.remove(gio_file)
+            except ValueError:
+                pass
+            if not self._file_list:
+                self.clearCarousel()
+                self._empty_message_label.set_visible(True)
+            else:
+                if self._current_index >= len(self._file_list):
+                    self._current_index = 0
+                self._update_picture()
+        self._resume_carousel_timer()
 
     def _on_swipe_end(self, gesture, x, y):
         dx, dy = gesture.get_velocity()
@@ -420,6 +470,9 @@ class MemoriesWindow(Adw.ApplicationWindow):
             except Exception:
                 pass
             self.timer = None
+
+        if self._delete_pending:
+            return
 
         delay = self.settings.get_int("delay")
         self.timer = GLib.timeout_add_seconds(delay, self.changePicture)
