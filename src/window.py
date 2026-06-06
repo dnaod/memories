@@ -108,13 +108,17 @@ class MemoriesWindow(Adw.ApplicationWindow):
         overlay.add_overlay(self.filename_label)
 
         self._empty_message_label = Gtk.Label(label="Please choose a Picture Folder")
+        self._empty_message_label.add_css_class("empty-folder-message")
         self._empty_message_label.set_halign(Gtk.Align.CENTER)
         self._empty_message_label.set_valign(Gtk.Align.CENTER)
         self._empty_message_label.set_visible(False)
         overlay.add_overlay(self._empty_message_label)
 
         filename_css = Gtk.CssProvider()
-        filename_css.load_from_data(b".filename-overlay { font-size: 11px; }")
+        filename_css.load_from_data(
+            b".filename-overlay { font-size: 11px; }"
+            b".empty-folder-message { cursor: pointer; }"
+        )
         Gtk.StyleContext.add_provider_for_display(
             Gdk.Display.get_default(),
             filename_css,
@@ -416,6 +420,12 @@ class MemoriesWindow(Adw.ApplicationWindow):
             or self._point_in_widget(self.menu_btn, x, y)
             or self._point_in_widget(self.pause_btn, x, y)
         ):
+            return
+        if (
+            self._empty_message_label.get_visible()
+            and self._point_in_widget(self._empty_message_label, x, y)
+        ):
+            self.get_application().activate_action("preferences", None)
             return
         w = overlay.get_allocated_width()
         if x < w / 3:
